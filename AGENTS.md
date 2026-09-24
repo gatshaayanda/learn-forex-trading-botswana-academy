@@ -234,7 +234,37 @@ Do not add unnecessary offline infrastructure before the core product works.
 
 ---
 
-## 9. WhatsApp Chatbot
+## 9. Academy Operating Model
+
+The academy is not only a course website. It is being built as a digital academy and student-management service.
+
+Known programme information supplied by the academy owner:
+
+- Prestige Course — 2,100 historical students; academy's most popular programme.
+- 5 Weeks Course — 1,020 historical students; five-week programme.
+- Legacy Trader Programme — 80 historical students; advanced programme conducted by the company CEO.
+- Combined historical population reported by the owner: 3,200+.
+- Programmes have different post-completion relationships: some are short courses where students complete and leave; others include ongoing/lifetime mentorship.
+- Completed students and alumni must be representable separately from currently active students.
+- BQA accreditation is an important academy trust/marketing requirement. Do not invent accreditation scope, registration numbers, programme accreditation, or qualification details. Use the owner's official BQA documentation before publishing exact claims.
+
+The student lifecycle should support, where appropriate:
+
+- prospect
+- lead
+- applied
+- enrolled
+- active
+- completed
+- alumni
+- lifetime mentorship
+- returning student
+
+The product should eventually connect public acquisition, WhatsApp, student learning, teacher operations, assessments, documents, communication, alumni, and owner reporting through one Firebase-backed system.
+
+Do not seed the reported 3,200+ as fake current users. Treat those figures as historical programme counts until the owner supplies/imports actual student records.
+
+## 10. WhatsApp Chatbot
 
 The WhatsApp chatbot is part of the product direction.
 
@@ -264,13 +294,30 @@ The initial webhook is expected to live at:
 
 WhatsApp credentials must remain in environment variables.
 
+Required production variables include `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, and optional `WHATSAPP_OWNER_PHONE`.
+
+`WHATSAPP_VERIFY_TOKEN` is an arbitrary secret chosen by the developer and must exactly match the token entered in Meta webhook configuration. It is not the Meta access token.
+
 The chatbot should not require an LLM for basic FAQ routing.
+
+The webhook should progressively support lead capture, programme categorisation, existing-student routing, owner escalation, and conversation records. Do not invent course fees or accreditation details.
+
+## Firebase Service Credentials
+
+The browser Firebase configuration is public application configuration and uses `NEXT_PUBLIC_FIREBASE_*` variables.
+
+Server-side Firebase Admin access uses `FIREBASE_ADMIN_KEY`, containing the complete JSON private key downloaded from Firebase Console → Project Settings → Service accounts → Firebase Admin SDK → Generate new private key. Use the Firebase Admin SDK service-account key, not a browser API key and not an unrelated Google service account. Never commit the JSON key.
+
+The current Firebase project is `learn-fx-trading-bw-academy`.
+
+Firebase Security Rules must default-deny and be evolved with the data model. The project should use Firebase Authentication, Firestore, and Storage only where the product needs them.
+
 
 AI can be considered later when there is a demonstrated need.
 
 ---
 
-## 10. UI / UX Rules
+## 11. UI / UX Rules
 
 Mobile-first is important.
 
@@ -293,7 +340,7 @@ Do not advertise unbuilt features as available.
 
 ---
 
-## 11. Existing Code Migration
+## 12. Existing Code Migration
 
 When removing Lyon-Case infrastructure:
 
@@ -310,7 +357,7 @@ Do not rewrite the entire application in one uncontrolled operation.
 
 ---
 
-## 12. Dependencies
+## 13. Dependencies
 
 Keep dependencies minimal.
 
@@ -324,7 +371,7 @@ Remove dependencies that become unused after the backend migration.
 
 ---
 
-## 13. Environment Variables
+## 14. Environment Variables
 
 Secrets and environment-specific values must never be hardcoded.
 
@@ -344,7 +391,7 @@ Document required environment variables without exposing their values.
 
 ---
 
-## 14. Deployment
+## 15. Deployment
 
 Deployment target:
 
@@ -367,7 +414,7 @@ STOP → inspect the actual failure → fix → verify locally → deploy again.
 
 ---
 
-## 15. Scope Control
+## 16. Scope Control
 
 The product owner decides product direction.
 
@@ -389,7 +436,7 @@ If the ambiguity materially affects architecture or product behavior, stop and a
 
 ---
 
-## 16. Quality Standard
+## 17. Quality Standard
 
 A feature is not complete merely because the code compiles.
 
@@ -408,7 +455,7 @@ The product should remain understandable and maintainable by the owner/developme
 
 ---
 
-## 17. Current Migration Plan
+## 18. Current Migration Plan
 
 The current controlled sequence is:
 
@@ -430,7 +477,7 @@ Do not skip ahead simply because later functionality is planned.
 
 ---
 
-## 18. Recovery Rule
+## 19. Recovery Rule
 
 If the application behaves differently from expectations:
 
