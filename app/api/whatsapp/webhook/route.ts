@@ -13,7 +13,7 @@ async function sendWhatsAppText(to: string, body: string) {
   const phoneNumberId = env("WHATSAPP_PHONE_NUMBER_ID");
   const accessToken = env("WHATSAPP_ACCESS_TOKEN");
 
-  console.log("WhatsApp outbound configuration", {\n    hasPhoneNumberId: Boolean(process.env.WHATSAPP_PHONE_NUMBER_ID),\n    hasAccessToken: Boolean(process.env.WHATSAPP_ACCESS_TOKEN),\n    graphApiVersion: GRAPH_API_VERSION,\n  });\n\n  const response = await fetch(
+  const response = await fetch(
     `https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneNumberId}/messages`,
     {
       method: "POST",
@@ -31,9 +31,28 @@ async function sendWhatsAppText(to: string, body: string) {
     },
   );
 
+  const responseText = await response.text();
+
   if (!response.ok) {
-    console.error("WhatsApp send failed:", response.status, await response.text());
+    console.error("WhatsApp send failed", {
+      status: response.status,
+      response: responseText,
+    });
+    return false;
   }
+
+  try {
+    const result = JSON.parse(responseText);
+    console.log("WhatsApp send accepted", {
+      status: response.status,
+      messageId: result?.messages?.[0]?.id ?? null,
+      recipient: result?.contacts?.[0]?.wa_id ?? to,
+    });
+  } catch {
+    console.log("WhatsApp send accepted", { status: response.status });
+  }
+
+  return true;
 }
 
 export async function GET(request: NextRequest) {
@@ -56,19 +75,33 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const message = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+    const change = body?.entry?.[0]?.changes?.[0];
+    const value = change?.value;
+    const message = value?.messages?.[0];
+
+    console.log("WhatsApp webhook event", {
+      object: body?.object ?? null,
+      field: change?.field ?? null,
+      hasMessages: Array.isArray(value?.messages) && value.messages.length > 0,
+      hasStatuses: Array.isArray(value?.statuses) && value.statuses.length > 0,
+    });
 
     if (!message || message.type !== "text" || !message.from) {
       return NextResponse.json({ received: true });
     }
 
-    const incoming = message.text?.body ?? "";
+    const incoming = typeof message.text?.body === "string" ? message.text.body.trim() : "";
+
+    if (!incoming) {
+      return NextResponse.json({ received: true });
+    }
+
     const response = replyFor(incoming);
 
-    console.log("WhatsApp incoming message", {
+    console.log("WhatsApp incoming text", {
       from: message.from,
-      messageType: message.type,
-      input: incoming,
+      messageId: message.id ?? null,
+      inputLength: incoming.length,
     });
 
     await sendWhatsAppText(message.from, response);
