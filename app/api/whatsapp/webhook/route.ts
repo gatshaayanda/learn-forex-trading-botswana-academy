@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { replyFor } from "@/lib/academy/chatbot";
 
-const GRAPH_API_VERSION = "v23.0";
+const GRAPH_API_VERSION = "v26.0";
 
 function env(name: string) {
   const value = process.env[name];
@@ -13,7 +13,7 @@ async function sendWhatsAppText(to: string, body: string) {
   const phoneNumberId = env("WHATSAPP_PHONE_NUMBER_ID");
   const accessToken = env("WHATSAPP_ACCESS_TOKEN");
 
-  const response = await fetch(
+  console.log("WhatsApp outbound configuration", {\n    hasPhoneNumberId: Boolean(process.env.WHATSAPP_PHONE_NUMBER_ID),\n    hasAccessToken: Boolean(process.env.WHATSAPP_ACCESS_TOKEN),\n    graphApiVersion: GRAPH_API_VERSION,\n  });\n\n  const response = await fetch(
     `https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneNumberId}/messages`,
     {
       method: "POST",
