@@ -499,3 +499,164 @@ Inspect:
 Then identify the smallest correction.
 
 Reality comes before assumptions.
+## 19. Product Model — Academy, Not Just Chatbot
+
+The product is a digital academy and student-management platform. WhatsApp is an entry/support channel, not the whole product.
+
+The academy must support these lifecycle states where appropriate:
+- prospect
+- applicant
+- enrolled
+- active student
+- completed
+- alumni
+- lifetime mentorship
+- inactive/returning
+
+Programme categories currently supplied by the owner:
+- Prestige Course — largest programme
+- 5 Weeks Course — short programme
+- Legacy Trader Programme — smaller advanced programme led by the CEO
+
+Historical programme counts supplied by the owner are 2,100 Prestige, 1,020 5 Weeks, and 80 Legacy Trader, totaling 3,200+. Treat these as owner-supplied historical figures, not live database counts.
+
+Do not confuse historical student counts with course prices.
+
+### Student experience
+
+The target student PWA should progressively support:
+- dashboard
+- enrolled programmes
+- lesson/module progression
+- assessments and grade/results records
+- assignments and document uploads
+- teacher feedback
+- announcements and notifications
+- course resources
+- teacher communication
+- student/community communication where appropriate
+- completion/alumni status
+- lifetime mentorship access where the student's programme provides it
+- WhatsApp support
+
+### Staff / instructor experience
+
+The target staff workspace should progressively support:
+- assigned students
+- course/lesson management
+- assessment review
+- grading/results
+- feedback
+- announcements
+- student communication
+- document/resource management
+
+### Owner experience
+
+The target owner/admin workspace should progressively support:
+- student lifecycle management
+- programme/enrollment management
+- progress monitoring
+- assessment/results monitoring
+- staff management
+- leads and WhatsApp conversations
+- announcements
+- alumni/lifetime mentorship
+- operational reporting
+- evidence-based cohort and engagement analysis
+
+Do not invent analytics or predictions before the required data exists. When enough real data exists, derive projections from observed completion, engagement, retention, assessment and re-enrollment data.
+
+### Accreditation
+
+The owner has stated that the academy is BQA accredited. Until official BQA documentation/details are supplied and checked, do not invent or display a registration number, qualification level, or programme accreditation claim. Store verified accreditation details as structured academy information when available.
+
+## 20. WhatsApp Production Workflow
+
+WhatsApp is being implemented through Meta WhatsApp Business Platform/Cloud API and the Next.js route `/api/whatsapp/webhook`.
+
+Required production environment variables:
+- `WHATSAPP_PHONE_NUMBER_ID` — Meta's Phone Number ID for the connected WhatsApp business number.
+- `WHATSAPP_ACCESS_TOKEN` — Meta access token used server-side to call the WhatsApp Graph API. Never expose it to client code or commit it.
+- `WHATSAPP_VERIFY_TOKEN` — a secret string chosen by this project and entered identically in Meta's webhook configuration. It is not the Meta access token.
+- `WHATSAPP_OWNER_PHONE` — digits-only international phone number used for owner handoff, e.g. `267...`.
+- `NEXT_PUBLIC_BASE_URL` — public academy URL used in WhatsApp responses.
+
+Never paste or commit WhatsApp access tokens.
+
+The initial chatbot is deterministic. Its first useful workflows should cover:
+1. welcome/menu
+2. programme discovery
+3. fees/payment enquiry without inventing prices
+4. how training works
+5. existing-student portal/support
+6. owner/human handoff
+7. prospect capture
+8. alumni/returning-student routing
+
+WhatsApp is a lead/support channel. The academy PWA remains the source of truth for student progress, courses, assessments, documents and staff workflows.
+
+## 21. Firebase Credential Rules
+
+The project Firebase backend is `learn-fx-trading-bw-academy`.
+
+Use the Firebase Web App configuration for browser/client initialization.
+
+Use a Firebase Admin SDK service-account private key for privileged server access. Firebase documents that Admin SDK service-account credentials grant privileged access and private keys must be kept secret.
+
+For Vercel, the preferred project secret is `FIREBASE_ADMIN_KEY` containing the JSON credentials for a service account belonging to this Firebase project.
+
+If multiple private keys have been generated for the same service account/project, do not guess which one to use. Use the newest intended key, verify it belongs to `learn-fx-trading-bw-academy`, add it only to the server environment, test the backend, then revoke/delete unused keys. Never commit the JSON file.
+
+Firebase client API configuration may be exposed through `NEXT_PUBLIC_*` variables; Admin service-account credentials and WhatsApp tokens may not.
+
+## 22. Data Architecture Direction
+
+Initial Firestore collections should remain understandable and small:
+- `admins`
+- `users`
+- `courses`
+- `lessons`
+- `enrollments`
+- `progress`
+- `assessments`
+- `submissions`
+- `announcements`
+- `notifications`
+- `resources`
+- `conversations` / `conversationMessages` where required for WhatsApp workflows
+
+Prefer stable document IDs, explicit timestamps, and user/programme references.
+
+Student data must be protected by Firebase Security Rules. Admin/staff operations must not rely only on hidden UI controls.
+
+## 23. PWA Direction
+
+The academy should become installable and mobile-first.
+
+Offline support should be introduced in controlled stages:
+1. reliable app shell/navigation
+2. cached public/static academy information
+3. local persistence for appropriate student state
+4. queued writes/synchronization only where the workflow can safely reconcile changes
+5. explicit offline/online status where useful
+
+Never claim a workflow is offline-capable until it has been tested offline and after reconnection.
+
+## 24. Client/Commercial Scope Control
+
+This is a real paying client project. Protect production trust.
+
+Do not fabricate:
+- prices
+- accreditation numbers
+- student counts as live database counts
+- completion statistics
+- grades
+- predictions
+- student records
+- payment status
+
+Build the smallest reliable workflow first, then expand.
+
+The commercial product is intended to become a long-term digital service: implementation, ongoing platform/support, and controlled future feature work. Avoid one-off architecture that prevents continued maintenance.
