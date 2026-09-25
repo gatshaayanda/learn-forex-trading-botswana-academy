@@ -660,3 +660,23 @@ Do not fabricate:
 Build the smallest reliable workflow first, then expand.
 
 The commercial product is intended to become a long-term digital service: implementation, ongoing platform/support, and controlled future feature work. Avoid one-off architecture that prevents continued maintenance.
+
+## 25. Current WhatsApp Bot Checkpoint — 25 September 2026
+
+The Academy chatbot now has a shared response engine used by both the PWA chat widget and the WhatsApp webhook.
+
+Current first-release behavior:
+- natural-language intent matching for programmes, fees/enrolment, training, existing students, alumni/returning students, menu and human support
+- truthful fee handling: the bot does not invent prices
+- truthful accreditation handling: the bot does not invent BQA details
+- academy URL included where useful
+- human handoff uses WHATSAPP_OWNER_PHONE when configured and otherwise tells the user that human takeover is required
+- WhatsApp webhook logs safe event/send diagnostics without logging access tokens
+- non-message WhatsApp status/events are acknowledged without attempting a reply
+- Graph API version is v26.0
+
+This is the reliable first chatbot layer. It is intentionally deterministic until an approved AI provider/key is configured. The next AI step can add natural-language generation on top of the same academy knowledge and safety rules without replacing the WhatsApp transport.
+
+Production WhatsApp target number supplied by the client: 26775337250. This is the business number the Meta/WhatsApp Business setup must ultimately connect; do not confuse it with a Meta development/test sender.
+
+Do not store or commit the client's WhatsApp access token. Required secrets remain Vercel environment variables.
