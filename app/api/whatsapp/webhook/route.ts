@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminDb } from "@/lib/firebase/admin";
 
 const GRAPH_API_VERSION = "v23.0";
+const ACADEMY_URL =
+  process.env.NEXT_PUBLIC_BASE_URL ??
+  "https://learn-forex-trading-botswana-academ-indol.vercel.app";
 
 function env(name: string) {
   const value = process.env[name];
@@ -32,7 +34,8 @@ async function sendWhatsAppText(to: string, body: string) {
   );
 
   if (!response.ok) {
-    console.error("WhatsApp send failed:", response.status, await response.text());
+    const detail = await response.text();
+    console.error("WhatsApp send failed:", response.status, detail);
   }
 }
 
@@ -40,91 +43,138 @@ function menu() {
   return [
     "Hi 👋 Welcome to Learn Forex Trading Botswana Academy.",
     "",
-    "What can we help you with?",
-    "",
-    "1️⃣ Courses",
-    "2️⃣ Fees",
+    "Reply with a number:",
+    "1️⃣ Programmes",
+    "2️⃣ Fees / enrolment",
     "3️⃣ How training works",
     "4️⃣ Existing student",
-    "5️⃣ Speak to the owner",
-    "6️⃣ Which course is right for me?",
+    "5️⃣ Alumni / completed student",
+    "6️⃣ Speak to the owner",
     "",
     "Reply MENU anytime to see these options again.",
+  ].join("\n");
+}
+
+function programmes() {
+  return [
+    "📚 Academy programmes",
+    "",
+    "1️⃣ Prestige Course — the academy's main programme.",
+    "2️⃣ 5 Weeks Course — a shorter structured programme.",
+    "3️⃣ Legacy Trader Programme — a smaller advanced programme led by the CEO.",
+    "",
+    "The academy also supports different student journeys, including students who complete a short programme and students who continue through longer-term mentorship.",
+    "",
+    "Visit the academy:",
+    ACADEMY_URL,
+    "",
+    "Reply MENU for the main menu.",
   ].join("\n");
 }
 
 function replyFor(message: string) {
   const input = message.trim().toLowerCase();
 
-  if (!input || ["hi", "hello", "hey", "menu", "start"].includes(input)) return menu();
+  if (!input || ["hi", "hello", "hey", "menu", "start"].includes(input)) {
+    return menu();
+  }
 
-  if (["1", "courses", "course"].includes(input)) {
+  if (["1", "courses", "course", "programmes", "programme"].includes(input)) {
+    return programmes();
+  }
+
+  if (
+    [
+      "2",
+      "fees",
+      "fee",
+      "price",
+      "prices",
+      "enrol",
+      "enrolment",
+      "enrollment",
+    ].includes(input)
+  ) {
     return [
-      "📚 Academy programmes",
+      "💰 Fees & enrolment",
       "",
-      "1️⃣ Prestige Course — the academy's most popular programme.",
-      "2️⃣ 5 Weeks Course — a structured five-week programme.",
-      "3️⃣ Legacy Trader Programme — an advanced programme conducted by the company CEO.",
+      "The academy has different programmes and student pathways, so we don't want to give you the wrong fee.",
       "",
-      "Some programmes are short-course programmes, while others can include ongoing/lifetime mentorship.",
+      "For the current price and enrolment options, speak to the academy owner.",
       "",
-      "Reply 6 if you want help choosing a programme.",
-      "Reply 5 to speak to the owner.",
+      "Reply 6 for the owner contact option.",
     ].join("\n");
   }
 
-  if (["2", "fees", "fee", "price", "prices"].includes(input)) {
-    return [
-      "💰 Fees",
-      "",
-      "Course fees and payment options can change, so I won't give you an outdated price.",
-      "",
-      "Reply 5 and I'll give you the owner contact option.",
-    ].join("\n");
-  }
-
-  if (["3", "training", "how training works", "how it works", "how"].includes(input)) {
+  if (
+    ["3", "training", "how training works", "how it works", "how"].includes(
+      input,
+    )
+  ) {
     return [
       "🎓 How training works",
       "",
-      "The academy provides structured forex education with lessons, practical learning, assessments and progression through your programme.",
+      "The academy provides structured forex training through lessons, practical learning, assessments and progression through your programme.",
       "",
-      "Your digital academy will also give students a place to monitor progress, access resources, receive feedback and communicate with the academy.",
+      "Some programmes are shorter and are completed after the training period. Other pathways can continue into longer-term mentorship.",
       "",
-      "Reply 4 if you are already a student.",
+      "Academy:",
+      ACADEMY_URL,
+      "",
+      "Reply MENU for the main menu.",
     ].join("\n");
   }
 
-  if (["4", "student", "existing student", "i am a student", "im a student"].includes(input)) {
+  if (
+    [
+      "4",
+      "student",
+      "existing student",
+      "i am a student",
+      "im a student",
+      "portal",
+      "login",
+    ].includes(input)
+  ) {
     return [
       "👋 Existing student",
       "",
-      "Your academy portal is where your course, lessons, progress, assessments and student support will live.",
+      "Continue through the academy portal:",
+      ACADEMY_URL,
       "",
-      process.env.NEXT_PUBLIC_BASE_URL ??
-        "https://learn-forex-trading-botswana-academ-indol.vercel.app",
-      "",
-      "If you need help from the owner, reply 5.",
+      "If you need account or learning support, reply 6 to request the owner.",
     ].join("\n");
   }
 
-  if (["6", "which course", "help me choose", "course recommendation", "which programme"].includes(input)) {
+  if (
+    [
+      "5",
+      "alumni",
+      "alumnus",
+      "completed",
+      "completed student",
+      "former student",
+      "returning",
+    ].includes(input)
+  ) {
     return [
-      "🧭 Choosing a programme",
+      "🎓 Completed / alumni student",
       "",
-      "Tell me what you're looking for:",
+      "If you have completed your programme, your academy relationship does not necessarily end there.",
       "",
-      "A — A structured short course",
-      "B — A five-week programme",
-      "C — Advanced/CEO-led mentorship",
+      "Some pathways include continued mentorship and support. The academy can also keep completed students connected to relevant future opportunities.",
       "",
-      "Reply A, B or C and we can route your enquiry.",
-      "You can also reply 5 to speak to the owner.",
+      "Reply 6 if you need help finding your next step.",
     ].join("\n");
   }
 
-  if (["5", "owner", "speak to owner", "contact", "human", "person"].includes(input)) {
+  if (
+    ["6", "owner", "speak to owner", "contact", "human", "person", "advisor"].includes(
+      input,
+    )
+  ) {
     const ownerPhone = process.env.WHATSAPP_OWNER_PHONE;
+
     return [
       "👤 Speak to the owner",
       "",
@@ -136,58 +186,11 @@ function replyFor(message: string) {
     ].join("\n");
   }
 
-  if (["a", "b", "c"].includes(input)) {
-    const labels: Record<string, string> = {
-      a: "short-course enquiry",
-      b: "5-weeks enquiry",
-      c: "advanced/CEO-led mentorship enquiry",
-    };
-    return [
-      "Thanks — I've noted your enquiry.",
-      "",
-      `Your enquiry type: ${labels[input]}`,
-      "",
-      "Reply 5 if you'd like to speak directly with the owner.",
-      "Reply MENU for the main menu.",
-    ].join("\n");
-  }
-
-  return ["I didn't quite understand that.", "", menu()].join("\n");
-}
-
-async function recordWhatsAppActivity(phone: string, message: string, response: string) {
-  try {
-    const db = getAdminDb();
-    const conversationRef = db.collection("whatsappConversations").doc(phone);
-    const leadRef = db.collection("leads").doc(phone);
-
-    await Promise.all([
-      conversationRef.set(
-        {
-          phone,
-          lastMessage: message,
-          lastResponse: response,
-          lastContactAt: new Date(),
-          channel: "whatsapp",
-        },
-        { merge: true },
-      ),
-      leadRef.set(
-        {
-          phone,
-          source: "whatsapp",
-          lastMessage: message,
-          lastContactAt: new Date(),
-          status: "lead",
-          updatedAt: new Date(),
-        },
-        { merge: true },
-      ),
-    ]);
-  } catch (error) {
-    // WhatsApp replies must not fail just because Firebase is not configured yet.
-    console.error("WhatsApp Firebase logging failed:", error);
-  }
+  return [
+    "I didn't quite understand that.",
+    "",
+    menu(),
+  ].join("\n");
 }
 
 export async function GET(request: NextRequest) {
@@ -210,7 +213,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const message = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+
+    const change = body?.entry?.[0]?.changes?.[0];
+    const value = change?.value;
+    const message = value?.messages?.[0];
 
     if (!message || message.type !== "text" || !message.from) {
       return NextResponse.json({ received: true });
@@ -219,10 +225,13 @@ export async function POST(request: NextRequest) {
     const incoming = message.text?.body ?? "";
     const response = replyFor(incoming);
 
-    await Promise.all([
-      sendWhatsAppText(message.from, response),
-      recordWhatsAppActivity(message.from, incoming, response),
-    ]);
+    console.log("WhatsApp incoming message", {
+      from: message.from,
+      messageType: message.type,
+      input: incoming,
+    });
+
+    await sendWhatsAppText(message.from, response);
 
     return NextResponse.json({ received: true });
   } catch (error) {
